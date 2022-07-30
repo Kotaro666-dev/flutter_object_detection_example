@@ -23,11 +23,8 @@ class ObjectDetectionPage extends HookConsumerWidget {
         data: (mlCamera) => Stack(
           children: [
             // カメラプレビューを表示
-            // TODO(Kotaro666-dev): 0.7.0以降からカメラプレビュー表示サイズに変化発生したことの対応
-            // 参考: https://pub.dev/packages/camera/versions/0.7.0+4
-            AspectRatio(
-              aspectRatio: mlCamera.cameraController.value.aspectRatio,
-              child: CameraPreview(mlCamera.cameraController),
+            CameraPreview(
+              mlCamera.cameraController,
             ),
             // バウンディングボックスを表示
             buildBoxes(

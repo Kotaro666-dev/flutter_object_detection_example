@@ -38,8 +38,8 @@ class MLCamera {
     Future(() async {
       classifier = Classifier();
       ratio = Platform.isAndroid
-          ? cameraViewSize.width / cameraController.value.previewSize.height
-          : cameraViewSize.width / cameraController.value.previewSize.width;
+          ? cameraViewSize.width / cameraController.value.previewSize!.height
+          : cameraViewSize.width / cameraController.value.previewSize!.width;
       actualPreviewSize = Size(
         cameraViewSize.width,
         cameraViewSize.width * ratio,
@@ -55,16 +55,16 @@ class MLCamera {
   Size cameraViewSize;
 
   /// アスペクト比
-  double ratio;
+  late double ratio;
 
   /// 識別器
-  Classifier classifier;
+  late Classifier classifier;
 
   /// 現在推論中か否か
   bool isPredicting = false;
 
   /// カメラプレビューの表示サイズ
-  Size actualPreviewSize;
+  late Size actualPreviewSize;
 
   /// 画像ストリーミングに対する処理
   Future<void> onLatestImageAvailable(CameraImage cameraImage) async {
@@ -111,9 +111,9 @@ class MLCamera {
 
 class IsolateData {
   IsolateData({
-    this.cameraImage,
-    this.interpreterAddress,
-    this.labels,
+    required this.cameraImage,
+    required this.interpreterAddress,
+    required this.labels,
   });
   final CameraImage cameraImage;
   final int interpreterAddress;

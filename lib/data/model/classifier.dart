@@ -8,15 +8,15 @@ import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
 
 class Classifier {
   Classifier({
-    Interpreter interpreter,
-    List<String> labels,
+    Interpreter? interpreter,
+    List<String>? labels,
   }) {
     loadModel(interpreter);
     loadLabels(labels);
   }
-  Interpreter _interpreter;
+  late Interpreter _interpreter;
   Interpreter get interpreter => _interpreter;
-  List<String> _labels;
+  late List<String> _labels;
   List<String> get labels => _labels;
   static const String modelFileName = 'detect.tflite';
   static const String labelFileName = 'labelmap.txt';
@@ -28,28 +28,26 @@ class Classifier {
   static const double threshold = 0.6;
 
   /// 画像の前処理用
-  ImageProcessor imageProcessor;
+  ImageProcessor? imageProcessor;
 
   /// インタプリタから受け取るTensorの次元
-  List<List<int>> _outputShapes;
+  final List<List<int>> _outputShapes = [];
 
   /// インタプリタから受け取るTensorのデータ型
-  List<TfLiteType> _outputTypes;
+  final List<TfLiteType> _outputTypes = [];
 
   /// 推論結果をいくつ表示するか
   static const int numResults = 10;
 
   /// assetsからインタプリタを読み込み
-  Future<void> loadModel(Interpreter interpreter) async {
+  Future<void> loadModel(Interpreter? interpreter) async {
     try {
       _interpreter = interpreter ??
           await Interpreter.fromAsset(
-            '$modelFileName',
+            modelFileName,
             options: InterpreterOptions()..threads = 4,
           );
       final outputTensors = _interpreter.getOutputTensors();
-      _outputShapes = [];
-      _outputTypes = [];
       for (final tensor in outputTensors) {
         _outputShapes.add(tensor.shape);
         _outputTypes.add(tensor.type);
@@ -60,7 +58,7 @@ class Classifier {
   }
 
   /// assetsからラベルを読み込み
-  Future<void> loadLabels(List<String> labels) async {
+  Future<void> loadLabels(List<String>? labels) async {
     try {
       _labels = labels ?? await FileUtil.loadLabels('assets/$labelFileName');
     } on Exception catch (e) {
@@ -93,15 +91,11 @@ class Classifier {
           ),
         )
         .build();
-    return imageProcessor.process(inputImage);
+    return imageProcessor!.process(inputImage);
   }
 
   /// 物体検出を行う
   List<Recognition> predict(image_lib.Image image) {
-    if (_interpreter == null) {
-      return null;
-    }
-
     // ImageからTensorImageを作成
     var inputImage = TensorImage.fromImage(image);
     // TensorImageを前処理
@@ -148,7 +142,7 @@ class Classifier {
       final labelIndex = outputClasses.getIntValue(i) + labelOffset;
       final label = _labels.elementAt(labelIndex);
       if (score > threshold) {
-        final transformRect = imageProcessor.inverseTransformRect(
+        final transformRect = imageProcessor!.inverseTransformRect(
           locations[i],
           image.height,
           image.width,

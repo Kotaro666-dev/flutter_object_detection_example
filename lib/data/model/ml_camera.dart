@@ -35,15 +35,15 @@ class MLCamera {
     this.cameraController,
     this.cameraViewSize,
   ) {
+    classifier = Classifier();
+    ratio = Platform.isAndroid
+        ? cameraViewSize.width / cameraController.value.previewSize!.height
+        : cameraViewSize.width / cameraController.value.previewSize!.width;
+    actualPreviewSize = Size(
+      cameraViewSize.width,
+      cameraViewSize.width * ratio,
+    );
     Future(() async {
-      classifier = Classifier();
-      ratio = Platform.isAndroid
-          ? cameraViewSize.width / cameraController.value.previewSize!.height
-          : cameraViewSize.width / cameraController.value.previewSize!.width;
-      actualPreviewSize = Size(
-        cameraViewSize.width,
-        cameraViewSize.width * ratio,
-      );
       // 画像ストリーミングを開始
       await cameraController.startImageStream(onLatestImageAvailable);
     });

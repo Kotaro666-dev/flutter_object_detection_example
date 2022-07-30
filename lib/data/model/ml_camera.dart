@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'dart:io';
 
 import 'package:camera/camera.dart';
@@ -68,9 +70,6 @@ class MLCamera {
 
   /// 画像ストリーミングに対する処理
   Future<void> onLatestImageAvailable(CameraImage cameraImage) async {
-    if (classifier.interpreter == null || classifier.labels == null) {
-      return;
-    }
     if (isPredicting) {
       return;
     }
@@ -90,7 +89,8 @@ class MLCamera {
   /// Isolateへ渡す推論関数
   /// Isolateには、static関数か、クラスに属さないトップレベル関数しか渡せないため、staticに
   static Future<List<Recognition>> inference(
-      IsolateData isolateCamImgData) async {
+    IsolateData isolateCamImgData,
+  ) async {
     var image = ImageUtils.convertYUV420ToImage(
       isolateCamImgData.cameraImage,
     );

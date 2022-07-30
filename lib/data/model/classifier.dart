@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'dart:math';
 
 import 'package:flutter_object_detection_example/data/entity/recognition.dart';

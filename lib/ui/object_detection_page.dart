@@ -10,6 +10,7 @@ class ObjectDetectionPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final deviceRatio = size.height / size.height;
     final mlCamera = useProvider(mlCameraProvider(size));
     final recognitions = useProvider(recognitionsProvider);
     return Scaffold(
@@ -21,8 +22,11 @@ class ObjectDetectionPage extends HookWidget {
         data: (mlCamera) => Stack(
           children: [
             // カメラプレビューを表示
-            CameraView(
-              mlCamera.cameraController,
+            // TODO: 0.7.0以降からカメラプレビュー表示サイズに変化発生したことの対応
+            // 参考: https://pub.dev/packages/camera/versions/0.7.0+4
+            AspectRatio(
+              aspectRatio: mlCamera.cameraController.value.aspectRatio,
+              child: CameraPreview(mlCamera.cameraController),
             ),
             // バウンディングボックスを表示
             buildBoxes(

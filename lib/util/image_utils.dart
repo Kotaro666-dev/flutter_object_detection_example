@@ -1,6 +1,9 @@
+// ignore_for_file: noop_primitive_operations, depend_on_referenced_packages
+
 import 'package:camera/camera.dart';
 import 'package:image/image.dart' as image_lib;
 
+// ignore: avoid_classes_with_only_static_members
 /// ImageUtils
 /// https://gist.github.com/am15h/e7c9da2e123642aa6452a2baa96c3ff3#file-image_utils-dart
 class ImageUtils {
@@ -18,7 +21,7 @@ class ImageUtils {
     for (var w = 0; w < width; w++) {
       for (var h = 0; h < height; h++) {
         final uvIndex =
-            uvPixelStride * (w / 2).floor() + uvRowStride * (h / 2).floor();
+            uvPixelStride! * (w / 2).floor() + uvRowStride * (h / 2).floor();
         final index = h * width + w;
 
         final y = cameraImage.planes[0].bytes[index];

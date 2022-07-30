@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'dart:io';
 
 import 'package:camera/camera.dart';
@@ -35,15 +37,15 @@ class MLCamera {
     this.cameraController,
     this.cameraViewSize,
   ) {
+    classifier = Classifier();
+    ratio = Platform.isAndroid
+        ? cameraViewSize.width / cameraController.value.previewSize!.height
+        : cameraViewSize.width / cameraController.value.previewSize!.width;
+    actualPreviewSize = Size(
+      cameraViewSize.width,
+      cameraViewSize.width * ratio,
+    );
     Future(() async {
-      classifier = Classifier();
-      ratio = Platform.isAndroid
-          ? cameraViewSize.width / cameraController.value.previewSize.height
-          : cameraViewSize.width / cameraController.value.previewSize.width;
-      actualPreviewSize = Size(
-        cameraViewSize.width,
-        cameraViewSize.width * ratio,
-      );
       // 画像ストリーミングを開始
       await cameraController.startImageStream(onLatestImageAvailable);
     });
@@ -55,22 +57,19 @@ class MLCamera {
   Size cameraViewSize;
 
   /// アスペクト比
-  double ratio;
+  late double ratio;
 
   /// 識別器
-  Classifier classifier;
+  late Classifier classifier;
 
   /// 現在推論中か否か
   bool isPredicting = false;
 
   /// カメラプレビューの表示サイズ
-  Size actualPreviewSize;
+  late Size actualPreviewSize;
 
   /// 画像ストリーミングに対する処理
   Future<void> onLatestImageAvailable(CameraImage cameraImage) async {
-    if (classifier.interpreter == null || classifier.labels == null) {
-      return;
-    }
     if (isPredicting) {
       return;
     }
@@ -82,7 +81,7 @@ class MLCamera {
     );
 
     // 推論処理は重く、Isolateを使わないと画面が固まる
-    _read(recognitionsProvider).state =
+    _read(recognitionsProvider.notifier).state =
         await compute(inference, isolateCamImgData);
     isPredicting = false;
   }
@@ -90,7 +89,8 @@ class MLCamera {
   /// Isolateへ渡す推論関数
   /// Isolateには、static関数か、クラスに属さないトップレベル関数しか渡せないため、staticに
   static Future<List<Recognition>> inference(
-      IsolateData isolateCamImgData) async {
+    IsolateData isolateCamImgData,
+  ) async {
     var image = ImageUtils.convertYUV420ToImage(
       isolateCamImgData.cameraImage,
     );
@@ -111,9 +111,9 @@ class MLCamera {
 
 class IsolateData {
   IsolateData({
-    this.cameraImage,
-    this.interpreterAddress,
-    this.labels,
+    required this.cameraImage,
+    required this.interpreterAddress,
+    required this.labels,
   });
   final CameraImage cameraImage;
   final int interpreterAddress;

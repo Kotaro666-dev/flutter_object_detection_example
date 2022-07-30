@@ -5,14 +5,15 @@ import 'package:flutter_object_detection_example/data/entity/recognition.dart';
 import 'package:flutter_object_detection_example/data/model/ml_camera.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ObjectDetectionPage extends HookWidget {
+class ObjectDetectionPage extends HookConsumerWidget {
+  const ObjectDetectionPage({Key? key}) : super(key: key);
+
   static String routeName = '/object_detection';
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final size = MediaQuery.of(context).size;
-    final deviceRatio = size.height / size.height;
-    final mlCamera = useProvider(mlCameraProvider(size));
-    final recognitions = useProvider(recognitionsProvider);
+    final mlCamera = ref.watch(mlCameraProvider(size));
+    final recognitions = ref.watch(recognitionsProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Object Detection'),
@@ -22,15 +23,12 @@ class ObjectDetectionPage extends HookWidget {
         data: (mlCamera) => Stack(
           children: [
             // カメラプレビューを表示
-            // TODO: 0.7.0以降からカメラプレビュー表示サイズに変化発生したことの対応
-            // 参考: https://pub.dev/packages/camera/versions/0.7.0+4
-            AspectRatio(
-              aspectRatio: mlCamera.cameraController.value.aspectRatio,
-              child: CameraPreview(mlCamera.cameraController),
+            CameraPreview(
+              mlCamera.cameraController,
             ),
             // バウンディングボックスを表示
             buildBoxes(
-              recognitions.state,
+              recognitions,
               mlCamera.actualPreviewSize,
               mlCamera.ratio,
             ),
@@ -56,15 +54,15 @@ class ObjectDetectionPage extends HookWidget {
     Size actualPreviewSize,
     double ratio,
   ) {
-    if (recognitions == null || recognitions.isEmpty) {
+    if (recognitions.isEmpty) {
       return const SizedBox();
     }
     return Stack(
       children: recognitions.map((result) {
         return BoundingBox(
-          result,
-          actualPreviewSize,
-          ratio,
+          result: result,
+          actualPreviewSize: actualPreviewSize,
+          ratio: ratio,
         );
       }).toList(),
     );
@@ -72,9 +70,10 @@ class ObjectDetectionPage extends HookWidget {
 }
 
 class CameraView extends StatelessWidget {
-  const CameraView(
-    this.cameraController,
-  );
+  const CameraView({
+    Key? key,
+    required this.cameraController,
+  }) : super(key: key);
   final CameraController cameraController;
   @override
   Widget build(BuildContext context) {
@@ -86,11 +85,12 @@ class CameraView extends StatelessWidget {
 }
 
 class BoundingBox extends HookWidget {
-  const BoundingBox(
-    this.result,
-    this.actualPreviewSize,
-    this.ratio,
-  );
+  const BoundingBox({
+    Key? key,
+    required this.result,
+    required this.actualPreviewSize,
+    required this.ratio,
+  }) : super(key: key);
   final Recognition result;
   final Size actualPreviewSize;
   final double ratio;
@@ -110,7 +110,7 @@ class BoundingBox extends HookWidget {
         height: renderLocation.height,
         decoration: BoxDecoration(
           border: Border.all(
-            color: Theme.of(context).accentColor,
+            color: Theme.of(context).colorScheme.secondary,
             width: 3,
           ),
           borderRadius: const BorderRadius.all(
@@ -128,7 +128,7 @@ class BoundingBox extends HookWidget {
       alignment: Alignment.topLeft,
       child: FittedBox(
         child: ColoredBox(
-          color: Theme.of(context).accentColor,
+          color: Theme.of(context).colorScheme.secondary,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

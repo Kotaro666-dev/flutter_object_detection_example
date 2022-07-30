@@ -82,7 +82,7 @@ class MLCamera {
     );
 
     // 推論処理は重く、Isolateを使わないと画面が固まる
-    _read(recognitionsProvider).state =
+    _read(recognitionsProvider.notifier).state =
         await compute(inference, isolateCamImgData);
     isPredicting = false;
   }

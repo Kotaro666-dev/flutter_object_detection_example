@@ -5,14 +5,14 @@ import 'package:flutter_object_detection_example/data/entity/recognition.dart';
 import 'package:flutter_object_detection_example/data/model/ml_camera.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ObjectDetectionPage extends HookWidget {
+class ObjectDetectionPage extends HookConsumerWidget {
   static String routeName = '/object_detection';
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final size = MediaQuery.of(context).size;
     final deviceRatio = size.height / size.height;
-    final mlCamera = useProvider(mlCameraProvider(size));
-    final recognitions = useProvider(recognitionsProvider);
+    final mlCamera = ref.watch(mlCameraProvider(size));
+    final recognitions = ref.watch(recognitionsProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Object Detection'),
@@ -30,7 +30,7 @@ class ObjectDetectionPage extends HookWidget {
             ),
             // バウンディングボックスを表示
             buildBoxes(
-              recognitions.state,
+              recognitions,
               mlCamera.actualPreviewSize,
               mlCamera.ratio,
             ),
